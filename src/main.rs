@@ -2,6 +2,7 @@
 //! audio), transcribes it with whisper.cpp after the call, and streams live
 //! levels to a bar widget.
 
+mod actions;
 mod agent;
 mod animation;
 mod audio;
@@ -27,6 +28,15 @@ pub const APP_NAME: &str = "omarchy-meeting-recorder";
 fn main() -> glib::ExitCode {
     match std::env::args().nth(1).as_deref() {
         None => ui::run(None),
+        Some("--version" | "-V") => {
+            let backend = if cfg!(feature = "vulkan") {
+                "Vulkan support; CPU fallback"
+            } else {
+                "CPU-only"
+            };
+            println!("{APP_NAME} {} ({backend})", env!("CARGO_PKG_VERSION"));
+            glib::ExitCode::SUCCESS
+        }
         Some("watch") => {
             ipc::watch();
             glib::ExitCode::SUCCESS
@@ -44,6 +54,15 @@ fn main() -> glib::ExitCode {
         }
         Some("diarize") => diarize::cli(&std::env::args().skip(2).collect::<Vec<_>>()),
         Some("transcribe") => transcribe::cli(&std::env::args().skip(2).collect::<Vec<_>>()),
+        Some("action") => actions::cli(&std::env::args().skip(2).collect::<Vec<_>>()),
+        // A new window in the running app, or the app itself when it is not running.
+        Some("new-window") => {
+            if ipc::send("new-window") {
+                glib::ExitCode::SUCCESS
+            } else {
+                ui::run(None)
+            }
+        }
         Some("ask") => agent::cli(&std::env::args().skip(2).collect::<Vec<_>>()),
         Some("-h" | "--help") => {
             println!(
@@ -60,6 +79,10 @@ fn main() -> glib::ExitCode {
             println!("  transcribe    transcribe two tracks and print the transcript as Markdown");
             println!(
                 "  ask           run a prompt over stdin through the default agent, without tools"
+            );
+            println!("  action        run one of your actions on a meeting folder");
+            println!(
+                "  new-window    open another window, for a second meeting (Ctrl+N in the app)"
             );
             glib::ExitCode::SUCCESS
         }

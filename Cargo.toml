@@ -1,6 +1,6 @@
 [package]
 name = "omarchy-meeting-recorder"
-version = "1.1.1"
+version = "1.4.0"
 edition = "2024"
 
 [dependencies]
@@ -15,7 +15,7 @@ ureq = "3.4.2"
 whisper-rs = "0.16"
 
 [features]
-default = []
+default = ["vulkan"]
 # GPU transcription through whisper.cpp's Vulkan backend. Needs the Vulkan
 # headers (`vulkan-headers` on Arch) and glslc (`shaderc`) to build.
 vulkan = ["whisper-rs/vulkan"]
