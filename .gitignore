@@ -1,5 +1,7 @@
 /target
 /windows-recorder/target/
+/windows-recorder/packaging/dist/
+/windows-recorder/packaging/build-cache/
 /recordings/
 # The full screenshot and video library; only the images the README uses live in screenshots/.
 /media/
